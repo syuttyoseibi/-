@@ -11,33 +11,51 @@ module.exports = async (req, res) => {
             return res.status(500).json({ error: 'API key is not configured.' });
         }
 
-        const { image } = req.body;
-        if (!image) {
-            return res.status(400).json({ error: 'Image data is required.' });
-        }
+        const { image, question, history } = req.body;
 
-        const mimeType = image.match(/data:(.*);base64,/)[1];
-        const base64Data = image.split(',')[1];
+        // リクエストの形式を検証
+        if (!image && !question) {
+            return res.status(400).json({ error: 'Image or question is required.' });
+        }
 
         const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${apiKey}`;
 
-        const requestBody = {
-            contents: [
-                {
-                    parts: [
-                        {
-                            text: "あなたは優秀で親切な家庭教師です。まず、画像に写っている問題を注意深く分析してください。次に、その問題を解き、最終的な答えを導き出してください。最後に、あなたの答えが正しいか必ず確認してください。\n\n解説は、日本の小学生や中学生にも分かるように、非常に丁寧な言葉遣いでお願いします。答えだけでなく、その答えに至るまでの考え方、途中式、重要なポイントを、順を追って詳しく説明してください。\n\n【重要】最終的な出力は、すべての漢字にふりがなを振ったHTML形式で生成してください。ふりがなは、`<ruby>漢字<rt>かんじ</rt></ruby>`のように、必ずHTMLのrubyタグを使用してください。"
-                        },
-                        {
-                            inline_data: {
-                                mime_type: mimeType,
-                                data: base64Data
-                            }
+        let contents = [];
+
+        if (image) { // 初回のリクエスト
+            const mimeType = image.match(/data:(.*);base64,/)[1];
+            const base64Data = image.split(',')[1];
+            contents.push({
+                role: 'user',
+                parts: [
+                    {
+                        text: "あなたは優秀で親切な家庭教師です。
+
+【思考プロセス】
+1. まず、画像に写っている問題や、特にグラフや図表を注意深く、詳細に観察・分析してください。軸のラベル、単位、データ点などを正確に読み取ります。
+2. 次に、その分析結果に基づいて問題を解き、最終的な答えを導き出してください。
+3. 最後に、あなたの答えが正しいか必ず確認してください。
+
+【解説のルール】
+解説は、日本の小学生や中学生にも分かるように、非常に丁寧な言葉遣いでお願いします。答えだけでなく、その答えに至るまでの考え方、途中式、重要なポイントを、順を追って詳しく説明してください。
+
+【出力形式】
+最終的な出力は、すべての漢字にふりがなを振ったHTML形式で生成してください。ふりがなは、`<ruby>漢字<rt>かんじ</rt></ruby>`のように、必ずHTMLのrubyタグを使用してください。"
+                    },
+                    {
+                        inline_data: {
+                            mime_type: mimeType,
+                            data: base64Data
                         }
-                    ]
-                }
-            ]
-        };
+                    }
+                ]
+            });
+        } else { // 会話の続きのリクエスト
+            contents = history; // 今までの履歴を引き継ぐ
+            contents.push({ role: 'user', parts: [{ text: question }] });
+        }
+
+        const requestBody = { contents };
 
         const apiRes = await fetch(GEMINI_API_URL, {
             method: 'POST',
