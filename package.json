@@ -1,5 +1,7 @@
 {
   "dependencies": {
-    "node-fetch": "^2.7.0"
+    "node-fetch": "^2.7.0",
+    "kuroshiro": "^1.2.0",
+    "kuromoji": "^0.1.2"
   }
 }

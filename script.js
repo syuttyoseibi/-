@@ -99,7 +99,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             const data = await response.json();
-            resultText.textContent = data.result;
+            resultText.innerHTML = data.result; // innerHTMLに変更してタグを解釈させる
             saveToHistory(imageDataUrl, data.result);
 
         } catch (error) {
