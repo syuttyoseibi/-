@@ -13,7 +13,6 @@ module.exports = async (req, res) => {
 
         const { image, question, history } = req.body;
 
-        // リクエストの形式を検証
         if (!image && !question) {
             return res.status(400).json({ error: 'Image or question is required.' });
         }
@@ -22,14 +21,14 @@ module.exports = async (req, res) => {
 
         let contents = [];
 
-        if (image) { // 初回のリクエスト
+        if (image) { // Initial request
             const mimeType = image.match(/data:(.*);base64,/)[1];
             const base64Data = image.split(',')[1];
             contents.push({
                 role: 'user',
                 parts: [
                     {
-                        text: "あなたは優秀で親切な家庭教師です。
+                        text: `あなたは優秀で親切な家庭教師です。
 
 【思考プロセス】
 1. まず、画像に写っている問題や、特にグラフや図表を注意深く、詳細に観察・分析してください。軸のラベル、単位、データ点などを正確に読み取ります。
@@ -40,7 +39,7 @@ module.exports = async (req, res) => {
 解説は、日本の小学生や中学生にも分かるように、非常に丁寧な言葉遣いでお願いします。答えだけでなく、その答えに至るまでの考え方、途中式、重要なポイントを、順を追って詳しく説明してください。
 
 【出力形式】
-最終的な出力は、すべての漢字にふりがなを振ったHTML形式で生成してください。ふりがなは、`<ruby>漢字<rt>かんじ</rt></ruby>`のように、必ずHTMLのrubyタグを使用してください。"
+最終的な出力は、すべての漢字にふりがなを振ったHTML形式で生成してください。ふりがなは、<ruby>漢字<rt>かんじ</rt></ruby>のように、必ずHTMLのrubyタグを使用してください。`
                     },
                     {
                         inline_data: {
@@ -50,8 +49,8 @@ module.exports = async (req, res) => {
                     }
                 ]
             });
-        } else { // 会話の続きのリクエスト
-            contents = history; // 今までの履歴を引き継ぐ
+        } else { // Follow-up request
+            contents = history; // Restore conversation history
             contents.push({ role: 'user', parts: [{ text: question }] });
         }
 
