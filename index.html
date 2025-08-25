@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>宿題スナップ</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>宿題スナップ</h1>
+        <p>カメラや画像ファイルから問題を読み込んで、AIに質問しよう！</p>
+
+        <div class="input-area">
+            <div class="camera-view" id="camera-container" style="display: none;">
+                <video id="video" autoplay playsinline></video>
+                <button id="capture-btn">撮影する</button>
+            </div>
+            <div class="button-group">
+                <button id="start-camera-btn">カメラを起動</button>
+                <label for="upload-btn" class="upload-label">画像を選択</label>
+                <input type="file" id="upload-btn" accept="image/*" style="display: none;">
+            </div>
+        </div>
+
+        <div class="preview-area" id="preview-container" style="display: none;">
+            <h2>プレビュー</h2>
+            <img id="preview-img" src="" alt="Preview Image">
+            <button id="solve-btn">この問題について質問する</button>
+        </div>
+
+        <div class="result-area" id="result-container">
+            <h2>AIの解説</h2>
+            <div id="loading" style="display: none;">
+                <div class="spinner"></div>
+                <p>AIが考えています...</p>
+            </div>
+            <div id="result-text">
+                <p>ここに解説が表示されます。</p>
+            </div>
+        </div>
+
+        <div class="history-area">
+            <h2>学習の記録</h2>
+            <div id="history-list">
+                <p>まだ記録はありません。</p>
+            </div>
+            <button id="clear-history-btn">記録をすべて消去</button>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
