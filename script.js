@@ -94,8 +94,8 @@ document.addEventListener('DOMContentLoaded', () => {
             });
 
             if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.error || 'サーバーでエラーが発生しました。');
+                const errorText = await response.text(); // エラー応答をテキストとして読み取る
+                throw new Error(errorText || 'サーバーでエラーが発生しました。');
             }
 
             const data = await response.json();
