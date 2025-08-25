@@ -1,21 +1,4 @@
 const fetch = require('node-fetch');
-const Kuroshiro = require('kuroshiro').default;
-const KuromojiAnalyzer = require('kuroshiro-analyzer-kuromoji');
-
-// Kuroshiroのインスタンスを一度だけ初期化して再利用する
-const kuroshiro = new Kuroshiro();
-let kuroshiroReady = false;
-
-const initializeKuroshiro = async () => {
-    if (!kuroshiroReady) {
-        await kuroshiro.init(new KuromojiAnalyzer());
-        kuroshiroReady = true;
-        console.log("Kuroshiro initialized.");
-    }
-};
-
-// サーバーレス関数の初回実行時に初期化プロセスを開始
-initializeKuroshiro();
 
 module.exports = async (req, res) => {
     if (req.method !== 'POST') {
@@ -43,7 +26,7 @@ module.exports = async (req, res) => {
                 {
                     parts: [
                         {
-                            text: "あなたは優秀で親切な家庭教師です。まず、画像に写っている問題を注意深く、ステップ・バイ・ステップで分析してください。次に、その問題を解き、最終的な答えを導き出してください。最後に、あなたの答えが正しいか必ず確認してください。\n\n解説は、日本の小学生や中学生にも分かるように、非常に丁寧な言葉遣いでお願いします。答えだけでなく、その答えに至るまでの考え方、途中式、重要なポイントを、順を追って詳しく説明してください。専門用語には説明を加えるなど、理解を助ける工夫をしてください。\n\n最終的な出力形式は、まず『答え』を明確に書き、その後に『解説』を続けてください。"
+                            text: "あなたは優秀で親切な家庭教師です。まず、画像に写っている問題を注意深く分析してください。次に、その問題を解き、最終的な答えを導き出してください。最後に、あなたの答えが正しいか必ず確認してください。\n\n解説は、日本の小学生や中学生にも分かるように、非常に丁寧な言葉遣いでお願いします。答えだけでなく、その答えに至るまでの考え方、途中式、重要なポイントを、順を追って詳しく説明してください。\n\n【重要】最終的な出力は、すべての漢字にふりがなを振ったHTML形式で生成してください。ふりがなは、`<ruby>漢字<rt>かんじ</rt></ruby>`のように、必ずHTMLのrubyタグを使用してください。"
                         },
                         {
                             inline_data: {
@@ -71,17 +54,9 @@ module.exports = async (req, res) => {
         }
 
         const data = await apiRes.json();
-        const originalText = data.candidates[0].content.parts[0].text;
+        const text = data.candidates[0].content.parts[0].text;
 
-        // Kuroshiroが準備完了しているか確認
-        if (!kuroshiroReady) {
-            await initializeKuroshiro(); // もし未完了なら待つ
-        }
-
-        // Geminiからのテキストにふりがなを振る
-        const furiganaText = await kuroshiro.convert(originalText, { to: 'html', mode: 'furigana' });
-
-        res.status(200).json({ result: furiganaText });
+        res.status(200).json({ result: text });
 
     } catch (error) {
         console.error('Server Error:', error);
